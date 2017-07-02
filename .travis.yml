@@ -18,15 +18,13 @@ deploy:
       bnRQem5YeDdNbGdVT0ExZGZhZEk1NGh3OVJrVDJMb1E1bkJnOUlWb0NCSkNhbzd5VW5tNjU0OFdy
       bkMydTR2YUYyR2xqOEl1NHlhSk8zZ09FTFpsK3NPQTBnaUt5QmJVKzNTdGFod0EzMlIvaXp6Z1k9
   true:
-    python: 2.7
+    python: 3.6
     repo: limdauto/drf_openapi
     tags: true
 install: pip install -U tox-travis
 language: python
 python:
+- 3.6
 - 3.5
-- 3.4
-- 3.3
 - 2.7
-- 2.6
 script: tox
