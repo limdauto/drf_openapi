@@ -28,10 +28,10 @@ Utilities to generate OpenAPI-compatible schema from API made with Django Rest F
 Motivation
 -----------
 
-Django Rest Framework has an API schema generation/declaration mechanism provided by
+Django Rest Framework has an `API schema generation/declaration mechanism <http://www.django-rest-framework.org/api-guide/schemas/>`_ provided by
 `coreapi <http://www.coreapi.org/>`_ standard. There are a couple of problems with the current ecosystem:
 
-- CoreAPI is not compatible out of the box with OpenAPI which is a much more popular API standard with superior tooling support, i.e. Swagger et. al.
+- CoreAPI is not compatible out of the box with `OpenAPI <https://www.openapis.org/>`_ which is a much more popular API standard with superior tooling support, i.e. Swagger et. al.
 - The OpenAPI codec (compatibility layer) that CoreAPI team provides drops / doesn't support a number of useful OpenAPI features.
 
 This project was born to bridge the gap. In an ideal world, which very likely will happen somewhere in 2018, we won't need this project at all
