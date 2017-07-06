@@ -18,7 +18,7 @@ DRF OpenAPI
      :alt: Updates
 
 
-Utilities to generate OpenAPI-compatible schema from API made with Django Rest Framework
+Utilities to generate OpenAPI-compatible schema from API made with Django Rest Framework. This is **not** working yet. The README is put up for interface discussion.
 
 
 * Free software: MIT license
@@ -63,6 +63,76 @@ Features
 ^^^^^^^^^^
 
 * A declarative machanism to provide more metadata for an API endpoint and therefore providing richer information for documentation generation.
+
+
+Mechanism
+----------
+
+1. Serializers
+^^^^^^^^^^^^^^^^
+
+The features provided by drf_openapi is made possible by putting `DRF serialziers <http://www.django-rest-framework.org/api-guide/serializers/>`_ on steroid.
+It gives developer the ability to declaratively bind different serializers to different purposes (response, request) and methods (post, get, put).
+
+
+Class-based Views
+"""""""""""""""""""""""""
+
+.. code:: python
+
+   import operator
+
+   from rest_framework import serializers
+   from rest_framework.views import APIView
+   from rest_framework.response import Response
+   from rest_framework import authentication, permissions
+   from drf_openapi import VersionInfo, config_request, config_response
+
+   class GetUserRequestSerializer16(serializers.Serializer):
+       date_joined = serializers.DateTimeField(required=True)
+
+
+   class GetUserRequestSerializer(serializers.Serializer):
+       date_joined = serializers.DateTimeField()
+   
+
+   class GetUserResponseSerializer(VersionedSerializer):
+       usernames = serializers.ListField(child=serializers.CharField())
+
+
+   class ListUsers(APIView):
+       """
+       View to list all users in the system.
+
+       * Requires token authentication.
+       * Only admin users are able to access this view.
+
+       This example is adapted from DRF doco
+       """
+       authentication_classes = (authentication.TokenAuthentication,)
+       permission_classes = (permissions.IsAdminUser,)
+
+       @config_response(version='default', serializer=GetUserResponseSerializer)
+       @config_request(version='1.6', operator=operator.lt, serializer=GetUserRequestSerializer16)
+       @config_request(version='default', serializer=GetUserRequestSerializer)
+       def get(self, request, version, request_serializer_class, response_serializer_class):
+           """
+           Return a list of all users. Optionally filter by date_joined
+           """
+           # validate request data
+           request_serializer = request_serializer_class(data=request.GET)
+           request_serializer.is_valid(raise_exception=True)
+           date_joined = request_serializer.data.get('date_joined')
+           if date_joined:
+                usernames = [user.username for user in User.objects.filter(date_joined__gte=date_joined)]
+           else:
+                usernames = [user.username for user in User.objects.all()]
+
+           # validate response schema
+           response_serializer = response_serializer_class(data={'usernames': usernames})
+           response_serializer.is_valid(raise_exception=True)
+           return Response(response_serializer.data)
+
 
 Examples
 --------
