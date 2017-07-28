@@ -137,6 +137,9 @@ class OpenApiSchemaGenerator(SchemaGenerator):
         return links
 
     def get_serializer_doc(self, serializer):
+        if serializer.__doc__ is None:
+            return ''
+
         doc = []
         for line in serializer.__doc__.splitlines():
             doc.append(line.strip())

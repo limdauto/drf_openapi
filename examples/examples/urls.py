@@ -19,5 +19,6 @@ from django.contrib import admin
 API_PREFIX = r'^v(?P<version>[0-9]+\.[0-9]+)'
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(f'{API_PREFIX}/', include('drf_openapi.urls'))
+    url(f'{API_PREFIX}/', include('drf_openapi.urls')),
+    url(f'{API_PREFIX}/snippets/', include('snippets.urls')),
 ]
