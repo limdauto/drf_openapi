@@ -105,16 +105,26 @@ DRF OpenAPI support the separation of response schema and request schema on a pe
 
    from drf_openapi.utils import view_config
 
-   class MeEndpointSet(viewsets.ViewSet):
+   class SnippetList(APIView):
+   """
+   List all snippets, or create a new snippet.
+   """
+   
+   @view_config(response_serializer=SnippetSerializer)
+   def get(self, request, version, format=None):
+       snippets = Snippet.objects.all()
+       res = self.response_serializer(snippets, many=True)
+       res.is_valid(raise_exception=True)
+       return Response(res.validated_data)
 
-      @view_config(
-          request_serializer=MeRequestSerializer,
-          response_serializer=MeResponseSerializer,
-          validate_response=True)
-      def list(self, request, version) -> Response:
-          # the serializers are available on the self object
-          assert self.request_serializer == MeRequestSerializer
-          assert self.response_serializer == MeResponseSerializer
+   @view_config(request_serializer=SnippetSerializer, response_serializer=SnippetSerializer)
+   def post(self, request, version, format=None):
+       req = self.request_serializer(data=request.data)
+       req.is_valid(raise_exception=True)
+       req.save()
+       res = self.response_serializer(req.data)
+       res.is_valid(raise_exception=True)
+       return Response(res.validated_data, status=status.HTTP_201_CREATED)
 
 
 3. Add version to schema
@@ -127,17 +137,27 @@ To make a serializer version-specific, extends :code:`VersionedSerializer`
    
    from drf_openapi.entities import VersionedSerializer
    from rest_framework import serializers
+   
 
-   class MeResponseSerializer(VersionedSerializer):
-       class V1(serializers.Serializer):
-           avatar = serializers.CharField(allowed_null=True)
+   class SnippetSerializerV1(serializers.Serializer):
+       title = serializers.CharField(required=False, allow_blank=True, max_length=100)
+   
 
-       class V2(serialiers.Serializer):
-           avatar =  serializers.CharField(allowed_null=False)
-       
+   class SnippetSerializerV2(SnippetSerializerV1):
+       title = serializers.CharField(required=True, max_length=100)
+   
+   
+   class SnippetSerializer(VersionedSerializer):
+       """
+       Changelog:
+   
+       * **v1.0**: `title` is optional
+       * **v2.0**: `title` is required
+       """
+   
        VERSION_MAP = (
-           '>=1.0, <2.0': V1,
-           '>=2.0': V2
+           ('>=1.0, <2.0', SnippetSerializerV1),
+           ('>=2.0', SnippetSerializerV2),
        )
 
 
