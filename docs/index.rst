@@ -1,5 +1,5 @@
 Welcome to DRF OpenAPI's documentation!
-======================================
+=======================================
 
 Contents:
 
