@@ -27,7 +27,7 @@ First-class support for API versioning changelog & method-specific schema defini
 * Free software: MIT license
 * Documentation: https://drf-openapi.readthedocs.io.
 
-.. contents:: Table of Contents
+.. contents:: 
 
 Background
 -----------
@@ -52,11 +52,11 @@ DRF itself decides to support OpenAPI officially, if at all.
 Design
 -------------
 
-- Schema are automatically generated from `serializers <http://www.django-rest-framework.org/api-guide/serializers/>`
+- Schema are automatically generated from `serializers <http://www.django-rest-framework.org/api-guide/serializers/>`_
     - From here onwards, :code:`schema` and :code:`serializer` are used interchangably
 - Versioned schema is supported by extending :code:`VersionedSerializer`.
-- Metadata, i.e. versioning, response and request schema, are bound to a view method through the :code:`@view_config` decorator.
-    - Automatic response validation is optionally provided :code:`view_config(response_serializer=FooSerializer, validate_response=True)`
+- Metadata, i.e. versioning, response and request schema, are bound to a view method through the :code:`view_config` decorator.
+- Automatic response validation is optionally provided :code:`view_config(response_serializer=FooSerializer, validate_response=True)`
 
 Constraints
 -------------
@@ -64,6 +64,8 @@ Constraints
 Currently DRF OpenAPI only supports DRF project that has `versioning <http://www.django-rest-framework.org/api-guide/versioning/#urlpathversioning>`_ enabled.
 I have only tested `URLPathVersioning <http://www.django-rest-framework.org/api-guide/versioning/#urlpathversioning>`_ but I intend to suppor the full range of
 versioning scheme supported by DRF.
+
+Also the schema view is limited to staff member for now. I plan to add more granular permission very soon.
 
 Installation
 ------------
@@ -77,10 +79,6 @@ Usage
 
 1. Quickstart
 ^^^^^^^^^^^^^^
-
-Out of the box, DRF OpenAPI inspects all of the endpoints reigstered with Django Rest Framework (DRF) and automatically
-generate documenation for them based on metadata provided by DRF and your serializer definitions.
-So no need to do anything, just plug it in:
 
 .. code:: python
 
@@ -145,30 +143,8 @@ To make a serializer version-specific, extends :code:`VersionedSerializer`
 
 That's it. The :code:`view_config` decorator will be able to correctly determined what serializer to use based on the request version at run time.
 
+Examples
+----------
 
-Features
---------
-
-1. Schema
-^^^^^^^^^^
-
-* Add per method schema definition through inspecting serializers
-* Add per serializer versioning
-* Add capability to generate `response schema <https://github.com/encode/django-rest-framework/issues/4502>`_ on an endpoint.
-
-2. OpenAPI codec
-^^^^^^^^^^^^^^^^^^^^
-
-* Return response object as defined by the response schema
-* Return multiple response `status codes and messages <https://stackoverflow.com/questions/40175410/how-to-generate-list-of-response-messages-in-django-rest-swagger>`_. [TODO]
-
-3. UI
-^^^^^^^^^^
-
-* Support different OpenAPI UIs, not just Swagger. For example, `ReDoc <https://github.com/Rebilly/ReDoc>`_.
-
-4. Utils
-^^^^^^^^^^
-
-* A declarative machanism to provide more metadata for an API endpoint and therefore providing richer information for documentation generation.
-
+I have recreated the example in `DRF tutorial <http://www.django-rest-framework.org/tutorial/>`_ with OpenAPI schema enabled
+in `examples <examples/>`_.
