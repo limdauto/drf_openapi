@@ -35,6 +35,13 @@ class SnippetSerializerV2(SnippetSerializerV1):
 
 
 class SnippetSerializer(VersionedSerializer):
+    """
+    Changelog:
+
+    * **v1.0**: `title` is optional
+    * **v2.0**: `title` is required
+    """
+
     VERSION_MAP = (
         ('>=1.0, <2.0', SnippetSerializerV1),
         ('>=2.0', SnippetSerializerV2),
