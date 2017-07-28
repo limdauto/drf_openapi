@@ -13,7 +13,7 @@ with open('HISTORY.rst') as history_file:
 
 requirements = [
     'Click>=6.0',
-    # TODO: put package requirements here
+    'django-rest-swagger==2.1.2'
 ]
 
 setup_requirements = [
