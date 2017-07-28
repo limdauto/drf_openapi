@@ -136,6 +136,12 @@ class OpenApiSchemaGenerator(SchemaGenerator):
                 continue
         return links
 
+    def get_serializer_doc(self, serializer):
+        doc = []
+        for line in serializer.__doc__.splitlines():
+            doc.append(line.strip())
+        return '\n'.join(doc)
+
     def get_link(self, path, method, view, version=None):
         fields = self.get_path_fields(path, method, view)
         fields += self.get_serializer_fields(path, method, view, version=version)
@@ -152,12 +158,22 @@ class OpenApiSchemaGenerator(SchemaGenerator):
         method_name = getattr(view, 'action', method.lower())
         method_func = getattr(view, method_name, None)
 
+        request_serializer_class = getattr(method_func, 'request_serializer', None)
+        if request_serializer_class and issubclass(request_serializer_class, VersionedSerializer):
+            request_doc = self.get_serializer_doc(request_serializer_class)
+            if request_doc:
+                description = description + '\n\n**Request Description:**\n' + request_doc
+
         response_serializer_class = getattr(method_func, 'response_serializer', None)
         if response_serializer_class and issubclass(response_serializer_class, VersionedSerializer):
+            res_doc = self.get_serializer_doc(response_serializer_class)
+            if res_doc:
+                description = description + '\n\n**Response Description:**\n' + res_doc
             response_serializer_class = response_serializer_class.get(version)
 
         response_schema = self.get_response_object(response_serializer_class, method_func.__doc__) \
             if response_serializer_class else {}
+
 
         return OpenApiLink(
             response_schema=response_schema,
