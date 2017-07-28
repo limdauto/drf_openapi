@@ -17,6 +17,10 @@ DRF OpenAPI
      :target: https://pyup.io/repos/github/limdauto/drf_openapi/
      :alt: Updates
 
+.. image:: https://badges.gitter.im/drf_openapi/Lobby.svg
+   :alt: Join the chat at https://gitter.im/drf_openapi/Lobby
+   :target: https://gitter.im/drf_openapi/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
+
 
 Generates OpenAPI-compatible schema from API made with Django Rest Framework. Use `ReDoc <https://github.com/Rebilly/ReDoc>`_ as default interface instead of Swagger.
 First-class support for API versioning changelog & method-specific schema definition.
@@ -168,8 +172,3 @@ Examples
 
 I have recreated the example in `DRF tutorial <http://www.django-rest-framework.org/tutorial/>`_ with OpenAPI schema enabled
 in `examples <examples/>`_.
-
-
-.. image:: https://badges.gitter.im/drf_openapi/Lobby.svg
-   :alt: Join the chat at https://gitter.im/drf_openapi/Lobby
-   :target: https://gitter.im/drf_openapi/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
