@@ -162,13 +162,13 @@ class OpenApiSchemaGenerator(SchemaGenerator):
         method_func = getattr(view, method_name, None)
 
         request_serializer_class = getattr(method_func, 'request_serializer', None)
-        if request_serializer_class and issubclass(request_serializer_class, VersionedSerializer):
+        if request_serializer_class and issubclass(request_serializer_class, VersionedSerializers):
             request_doc = self.get_serializer_doc(request_serializer_class)
             if request_doc:
                 description = description + '\n\n**Request Description:**\n' + request_doc
 
         response_serializer_class = getattr(method_func, 'response_serializer', None)
-        if response_serializer_class and issubclass(response_serializer_class, VersionedSerializer):
+        if response_serializer_class and issubclass(response_serializer_class, VersionedSerializers):
             res_doc = self.get_serializer_doc(response_serializer_class)
             if res_doc:
                 description = description + '\n\n**Response Description:**\n' + res_doc

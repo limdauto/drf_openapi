@@ -24,3 +24,13 @@ History
 ------------------
 
 * Fix bug when parsing empty docstring of the serializer
+
+0.9.0 (2017-07-28)
+------------------
+
+* Rename base :code:`VersionedSerializer` into :code:`VersionedSerializers`
+
+0.9.1 (2017-07-28)
+------------------
+
+* Fix import issue after renaming

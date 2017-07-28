@@ -2,7 +2,7 @@ from functools import wraps
 
 from typing import Callable
 
-from drf_openapi.entities import VersionedSerializer
+from drf_openapi.entities import VersionedSerializers
 from rest_framework.response import Response
 
 
@@ -14,12 +14,12 @@ def view_config(request_serializer=None, response_serializer=None, validate_resp
 
         @wraps(view_method)
         def wrapper(instance, request, version, *args, **kwargs):
-            if request_serializer and issubclass(request_serializer, VersionedSerializer):
+            if request_serializer and issubclass(request_serializer, VersionedSerializers):
                 instance.request_serializer = request_serializer.get(version)
             else:
                 instance.request_serializer = request_serializer
 
-            if response_serializer and issubclass(response_serializer, VersionedSerializer):
+            if response_serializer and issubclass(response_serializer, VersionedSerializers):
                 instance.response_serializer = response_serializer.get(version)
             else:
                 instance.response_serializer = response_serializer
