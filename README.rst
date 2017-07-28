@@ -73,7 +73,10 @@ DRF OpenAPI support the separation of response schema and request schema on a pe
 
    class MeEndpointSet(viewsets.ViewSet):
 
-      @view_config(request_serializer=MeRequestSerializer, response_serializer=MeResponseSerializer)
+      @view_config(
+          request_serializer=MeRequestSerializer,
+          response_serializer=MeResponseSerializer,
+          validate_response=True)
       def list(self, request, version) -> Response:
           # the serializers are available on the self object
           assert self.request_serializer == MeRequestSerializer

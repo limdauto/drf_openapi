@@ -1,5 +1,5 @@
 # coding=utf-8
-from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
 from rest_framework import response
 from rest_framework.decorators import api_view, renderer_classes
 from rest_framework.renderers import CoreJSONRenderer
@@ -10,7 +10,7 @@ from drf_openapi.entities import OpenApiSchemaGenerator
 
 def get_schema_view(url, title):
 
-    @login_required
+    @staff_member_required
     @api_view()
     @renderer_classes([CoreJSONRenderer, SwaggerUIRenderer, OpenAPIRenderer])
     def schema_view(request, version):
