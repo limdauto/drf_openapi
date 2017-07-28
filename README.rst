@@ -18,7 +18,8 @@ DRF OpenAPI
      :alt: Updates
 
 
-Utilities to generate OpenAPI-compatible schema from API made with Django Rest Framework. Also use `ReDoc <https://github.com/Rebilly/ReDoc>`_ as default interface.
+Generates OpenAPI-compatible schema from API made with Django Rest Framework. Use `ReDoc <https://github.com/Rebilly/ReDoc>`_ as default interface instead of Swagger.
+First-class support for API versioning changelog & method-specific schema definition.
 
 .. image:: https://github.com/Rebilly/ReDoc/blob/master/demo/redoc-demo.png
 
@@ -26,7 +27,9 @@ Utilities to generate OpenAPI-compatible schema from API made with Django Rest F
 * Free software: MIT license
 * Documentation: https://drf-openapi.readthedocs.io.
 
-Motivation
+.. contents:: Table of Contents
+
+Background
 -----------
 
 Django Rest Framework has an `API schema generation/declaration mechanism <http://www.django-rest-framework.org/api-guide/schemas/>`_ provided by
@@ -36,11 +39,41 @@ Django Rest Framework has an `API schema generation/declaration mechanism <http:
 - The OpenAPI codec (compatibility layer) that CoreAPI team provides drops / doesn't support a number of useful OpenAPI features.
 - There is no support for versioning or method-specific schema.
 
-This project was born to bridge the gap. 
+This project was born to bridge the gap. The high-level requirements are as followed:
+
+- Can be dropped into any existing DRF project without any code change necessary.
+- Provide clear disctinction between request schema and response schema.
+- Provide a versioning mechanism for each schema. Support defining schema by version range syntax, e.g. :code:`>1.0, <=2.0`
+- All this information should be bound to view methods, not view classes.
+
+It's important to stress the non-intrusiveness requirement, not least because I want to minimize what I will have to change when
+DRF itself decides to support OpenAPI officially, if at all.
+
+Design
+-------------
+
+- Schema are automatically generated from `serializers <http://www.django-rest-framework.org/api-guide/serializers/>`
+    - From here onwards, :code:`schema` and :code:`serializer` are used interchangably
+- Versioned schema is supported by extending :code:`VersionedSerializer`.
+- Metadata, i.e. versioning, response and request schema, are bound to a view method through the :code:`@view_config` decorator.
+    - Automatic response validation is optionally provided :code:`view_config(response_serializer=FooSerializer, validate_response=True)`
+
+Constraints
+-------------
+
+Currently DRF OpenAPI only supports DRF project that has `versioning <http://www.django-rest-framework.org/api-guide/versioning/#urlpathversioning>`_ enabled.
+I have only tested `URLPathVersioning <http://www.django-rest-framework.org/api-guide/versioning/#urlpathversioning>`_ but I intend to suppor the full range of
+versioning scheme supported by DRF.
+
+Installation
+------------
+
+.. code:: bash
+   
+   pip install drf_openapi
 
 Usage
 ----------
-
 
 1. Quickstart
 ^^^^^^^^^^^^^^
@@ -56,11 +89,14 @@ So no need to do anything, just plug it in:
        ...
        'drf_openapi'   
    ]
+   REST_FRAMEWORK = {
+       'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.URLPathVersioning'
+   }
+
    # in urls.py
    urlpatterns += [url(f'{API_PREFIX}/', include('drf_openapi.urls'))]
 
-
-And voila! Your API documentation will be available at :code:`<API_Prefix>/schema`
+And voila! Your API documentation will be available at :code:`/<API_PREFIX>/schema`
 
 2. Add schema to a view method
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
