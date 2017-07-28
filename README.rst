@@ -18,7 +18,9 @@ DRF OpenAPI
      :alt: Updates
 
 
-Utilities to generate OpenAPI-compatible schema from API made with Django Rest Framework.
+Utilities to generate OpenAPI-compatible schema from API made with Django Rest Framework. Also use `ReDoc<https://github.com/Rebilly/ReDoc>`_ as default interface.
+
+.. image:: https://github.com/Rebilly/ReDoc/blob/master/demo/redoc-demo.png
 
 
 * Free software: MIT license
