@@ -18,12 +18,11 @@ DRF OpenAPI
      :alt: Updates
 
 
-Utilities to generate OpenAPI-compatible schema from API made with Django Rest Framework. This is **not** working yet. The README is put up for interface discussion.
+Utilities to generate OpenAPI-compatible schema from API made with Django Rest Framework.
 
 
 * Free software: MIT license
 * Documentation: https://drf-openapi.readthedocs.io.
-
 
 Motivation
 -----------
@@ -33,10 +32,78 @@ Django Rest Framework has an `API schema generation/declaration mechanism <http:
 
 - CoreAPI is not compatible out of the box with `OpenAPI <https://www.openapis.org/>`_ which is a much more popular API standard with superior tooling support, i.e. Swagger et. al.
 - The OpenAPI codec (compatibility layer) that CoreAPI team provides drops / doesn't support a number of useful OpenAPI features.
+- There is no support for versioning or method-specific schema.
 
-This project was born to bridge the gap. In an ideal world, which very likely will happen somewhere in 2018, we won't need this project at all
-as it seems DRF + CoreAPI team, a.k.a Tom Christie, are keen on providing these supports out of the box.
-In the mean time, for those who can't wait, feel free to use this package.
+This project was born to bridge the gap. 
+
+Usage
+----------
+
+
+1. Quickstart
+^^^^^^^^^^^^^^
+
+Out of the box, DRF OpenAPI inspects all of the endpoints reigstered with Django Rest Framework (DRF) and automatically
+generate documenation for them based on metadata provided by DRF and your serializer definitions.
+So no need to do anything, just plug it in:
+
+.. code:: python
+
+   # in settings.py
+   INSTALLED_APPS = [
+       ...
+       'drf_openapi'   
+   ]
+   # in urls.py
+   urlpatterns += [url(f'{API_PREFIX}/', include('drf_openapi.urls'))]
+
+
+And voila! Your API documentation will be available at :code:`<API_Prefix>/schema`
+
+2. Add schema to a view method
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+DRF OpenAPI support the separation of response schema and request schema on a per view method basis through the use of a `view_config` decorator
+
+.. code:: python
+
+   from drf_openapi.utils import view_config
+
+   class MeEndpointSet(viewsets.ViewSet):
+
+      @view_config(request_serializer=MeRequestSerializer, response_serializer=MeResponseSerializer)
+      def list(self, request, version) -> Response:
+          # the serializers are available on the self object
+          assert self.request_serializer == MeRequestSerializer
+          assert self.response_serializer == MeResponseSerializer
+
+
+3. Add version to schema
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+DRF OpenAPI support schema versioning through versioning the serializers that the schema are generated from.
+To make a serializer version-specific, extends :code:`VersionedSerializer`
+
+.. code:: python
+   
+   from drf_openapi.entities import VersionedSerializer
+   from rest_framework import serializers
+
+   class MeResponseSerializer(VersionedSerializer):
+       class V1(serializers.Serializer):
+           avatar = serializers.CharField(allowed_null=True)
+
+       class V2(serialiers.Serializer):
+           avatar =  serializers.CharField(allowed_null=False)
+       
+       VERSION_MAP = (
+           '>=1.0, <2.0': V1,
+           '>=2.0': V2
+       )
+
+
+That's it. The :code:`view_config` decorator will be able to correctly determined what serializer to use based on the request version at run time.
+
 
 Features
 --------
@@ -44,15 +111,15 @@ Features
 1. Schema
 ^^^^^^^^^^
 
+* Add per method schema definition through inspecting serializers
+* Add per serializer versioning
 * Add capability to generate `response schema <https://github.com/encode/django-rest-framework/issues/4502>`_ on an endpoint.
-* Add first-class support for endpoint-specific versioning
-* Add support for different response status codes and messages
 
 2. OpenAPI codec
-^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^
 
 * Return response object as defined by the response schema
-* Return multiple response `status codes and messages <https://stackoverflow.com/questions/40175410/how-to-generate-list-of-response-messages-in-django-rest-swagger>`_.
+* Return multiple response `status codes and messages <https://stackoverflow.com/questions/40175410/how-to-generate-list-of-response-messages-in-django-rest-swagger>`_. [TODO]
 
 3. UI
 ^^^^^^^^^^
@@ -64,77 +131,3 @@ Features
 
 * A declarative machanism to provide more metadata for an API endpoint and therefore providing richer information for documentation generation.
 
-
-Mechanism
-----------
-
-1. Serializers
-^^^^^^^^^^^^^^^^
-
-The features provided by drf_openapi is made possible by putting `DRF serialziers <http://www.django-rest-framework.org/api-guide/serializers/>`_ on steroid.
-It gives developer the ability to declaratively bind different serializers to different purposes (response, request) and methods (post, get, put).
-
-
-Class-based Views
-"""""""""""""""""""""""""
-
-.. code:: python
-
-   import operator
-
-   from rest_framework import serializers
-   from rest_framework.views import APIView
-   from rest_framework.response import Response
-   from rest_framework import authentication, permissions
-   from drf_openapi import VersionInfo, config_request, config_response
-
-   class GetUserRequestSerializer16(serializers.Serializer):
-       date_joined = serializers.DateTimeField(required=True)
-
-
-   class GetUserRequestSerializer(serializers.Serializer):
-       date_joined = serializers.DateTimeField()
-   
-
-   class GetUserResponseSerializer(VersionedSerializer):
-       usernames = serializers.ListField(child=serializers.CharField())
-
-
-   class ListUsers(APIView):
-       """
-       View to list all users in the system.
-
-       * Requires token authentication.
-       * Only admin users are able to access this view.
-
-       This example is adapted from DRF doco
-       """
-       authentication_classes = (authentication.TokenAuthentication,)
-       permission_classes = (permissions.IsAdminUser,)
-
-       @config_response(version='default', serializer=GetUserResponseSerializer)
-       @config_request(version='1.6', operator=operator.lt, serializer=GetUserRequestSerializer16)
-       @config_request(version='default', serializer=GetUserRequestSerializer)
-       def get(self, request, version, request_serializer_class, response_serializer_class):
-           """
-           Return a list of all users. Optionally filter by date_joined
-           """
-           # validate request data
-           request_serializer = request_serializer_class(data=request.GET)
-           request_serializer.is_valid(raise_exception=True)
-           date_joined = request_serializer.data.get('date_joined')
-           if date_joined:
-                usernames = [user.username for user in User.objects.filter(date_joined__gte=date_joined)]
-           else:
-                usernames = [user.username for user in User.objects.all()]
-
-           # validate response schema
-           response_serializer = response_serializer_class(data={'usernames': usernames})
-           response_serializer.is_valid(raise_exception=True)
-           return Response(response_serializer.data)
-
-
-Examples
---------
-
-To be added.
