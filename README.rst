@@ -54,7 +54,7 @@ Design
 
 - Schema are automatically generated from `serializers <http://www.django-rest-framework.org/api-guide/serializers/>`_
     - From here onwards, :code:`schema` and :code:`serializer` are used interchangably
-- Versioned schema is supported by extending :code:`VersionedSerializer`.
+- Versioned schema is supported by extending :code:`VersionedSerializers`.
 - Metadata, i.e. versioning, response and request schema, are bound to a view method through the :code:`view_config` decorator.
 - Automatic response validation is optionally provided :code:`view_config(response_serializer=FooSerializer, validate_response=True)`
 
@@ -131,11 +131,11 @@ DRF OpenAPI support the separation of response schema and request schema on a pe
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 DRF OpenAPI support schema versioning through versioning the serializers that the schema are generated from.
-To make a serializer version-specific, extends :code:`VersionedSerializer`
+To make a serializer version-specific, extends :code:`VersionedSerializers`
 
 .. code:: python
    
-   from drf_openapi.entities import VersionedSerializer
+   from drf_openapi.entities import VersionedSerializers
    from rest_framework import serializers
    
 
@@ -147,7 +147,7 @@ To make a serializer version-specific, extends :code:`VersionedSerializer`
        title = serializers.CharField(required=True, max_length=100)
    
    
-   class SnippetSerializer(VersionedSerializer):
+   class SnippetSerializer(VersionedSerializers):
        """
        Changelog:
    

@@ -13,7 +13,7 @@ from rest_framework import serializers
 from rest_framework.schemas import SchemaGenerator, insert_into, get_pk_description, field_to_schema
 
 
-class VersionedSerializer:
+class VersionedSerializers:
     """Adapted from https://github.com/avanov/Rhetoric/ :)
     """
     OPERATORS = {

@@ -1,4 +1,4 @@
-from drf_openapi.entities import VersionedSerializer
+from drf_openapi.entities import VersionedSerializers
 from rest_framework import serializers
 from snippets.models import Snippet, LANGUAGE_CHOICES, STYLE_CHOICES
 
@@ -34,7 +34,7 @@ class SnippetSerializerV2(SnippetSerializerV1):
     title = serializers.CharField(required=True, max_length=100)
 
 
-class SnippetSerializer(VersionedSerializer):
+class SnippetSerializer(VersionedSerializers):
     """
     Changelog:
 
