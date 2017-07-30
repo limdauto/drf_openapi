@@ -25,7 +25,7 @@ DRF OpenAPI
 Generates OpenAPI-compatible schema from API made with Django Rest Framework. Use `ReDoc <https://github.com/Rebilly/ReDoc>`_ as default interface instead of Swagger.
 First-class support for API versioning changelog & method-specific schema definition.
 
-.. image:: images/screenshot.png
+.. image:: https://raw.githubusercontent.com/limdauto/drf_openapi/master/images/screenshot.png
 
 .. contents:: 
 
@@ -75,6 +75,6 @@ Please read the `docs <https://drf-openapi.readthedocs.io>`_ for a quickstart.
 Also I have recreated the example in `DRF tutorial <http://www.django-rest-framework.org/tutorial/>`_ with OpenAPI schema enabled
 in `examples <examples/>`_.
 
-LICENSE
+License
 ---------
 MIT
