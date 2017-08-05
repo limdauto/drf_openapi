@@ -72,7 +72,7 @@ versioning scheme supported by DRF.
 
 Also the schema view is limited to staff member for now. I plan to add more granular permission very soon.
 
-5.Examples
+5. Examples
 ------------
 
 Please read the `docs <https://drf-openapi.readthedocs.io>`_ for a quickstart.
@@ -80,6 +80,6 @@ Please read the `docs <https://drf-openapi.readthedocs.io>`_ for a quickstart.
 Also I have recreated the example in `DRF tutorial <http://www.django-rest-framework.org/tutorial/>`_ with OpenAPI schema enabled
 in `<examples/>`_.
 
-6.License
+6. License
 ------------
 MIT
