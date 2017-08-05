@@ -114,4 +114,6 @@ def _get_responses(link: OpenApiLink) -> Dict:
     """
     template = link.response_schema
     template.update({'description': 'Success'})
-    return {200: template}
+    res = {200: template}
+    res.update(link.error_status_codes)
+    return res

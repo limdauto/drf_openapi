@@ -77,7 +77,6 @@ class VersionedSerializers:
 
 
 class OpenApiSchemaGenerator(SchemaGenerator):
-
     def __init__(self, version, title=None, url=None, description=None, patterns=None, urlconf=None):
         self.version = version
         super(OpenApiSchemaGenerator, self).__init__(title, url, description, patterns, urlconf)
@@ -174,12 +173,12 @@ class OpenApiSchemaGenerator(SchemaGenerator):
                 description = description + '\n\n**Response Description:**\n' + res_doc
             response_serializer_class = response_serializer_class.get(version)
 
-        response_schema = self.get_response_object(response_serializer_class, method_func.__doc__) \
-            if response_serializer_class else {}
-
+        response_schema, error_status_codes = self.get_response_object(
+            response_serializer_class, method_func.__doc__) if response_serializer_class else ({}, {})
 
         return OpenApiLink(
             response_schema=response_schema,
+            error_status_codes=error_status_codes,
             url=path.replace('{version}', self.version),  # can't use format because there may be other param
             action=method.lower(),
             encoding=encoding,
@@ -287,7 +286,7 @@ class OpenApiSchemaGenerator(SchemaGenerator):
 
         for field in serializer.fields.values():
             if isinstance(field, serializers.Serializer):
-                nested_obj[field.field_name] = self.get_response_object(field.__class__, None)['schema']
+                nested_obj[field.field_name] = self.get_response_object(field.__class__, None)[0]['schema']
                 nested_obj[field.field_name]['description'] = field.help_text
                 continue
 
@@ -308,23 +307,32 @@ class OpenApiSchemaGenerator(SchemaGenerator):
                         'type': 'object',
                         'properties': nested_obj
                     }
-                }
+                }, {}
             else:
-                return {}
+                return {}, {}
 
         schema = res[0]['schema']
         schema['properties'].update(nested_obj)
-
-        return {
+        response_schema = {
             'description': description,
             'schema': schema
         }
+
+        error_status_codes = {}
+
+        response_meta = getattr(response_serializer_class, 'Meta', None)
+
+        for status_code, description in getattr(response_meta, 'error_status_codes', {}).items():
+            error_status_codes[status_code] = {'description': description}
+
+        return response_schema, error_status_codes
 
 
 class OpenApiDocument(Document):
     """OpenAPI-compliant document provides:
     - Versioning information
     """
+
     def __init__(self, version, url=None, title=None, description=None, media_type=None, content=None):
         super(OpenApiDocument, self).__init__(
             url=url,
@@ -344,7 +352,9 @@ class OpenApiLink(Link):
     """OpenAPI-compliant Link provides:
     - Schema to the response
     """
-    def __init__(self, response_schema, url=None, action=None, encoding=None, transform=None, title=None,
+
+    def __init__(self, response_schema, error_status_codes,
+                 url=None, action=None, encoding=None, transform=None, title=None,
                  description=None, fields=None):
         super(OpenApiLink, self).__init__(
             url=url,
@@ -356,7 +366,12 @@ class OpenApiLink(Link):
             fields=fields
         )
         self._response_schema = response_schema
+        self._error_status_codes = error_status_codes
 
     @property
     def response_schema(self):
         return self._response_schema
+
+    @property
+    def error_status_codes(self):
+        return self._error_status_codes

@@ -1,3 +1,5 @@
+from rest_framework.status import HTTP_400_BAD_REQUEST
+
 from drf_openapi.entities import VersionedSerializers
 from rest_framework import serializers
 from snippets.models import Snippet, LANGUAGE_CHOICES, STYLE_CHOICES
@@ -10,6 +12,11 @@ class SnippetSerializerV1(serializers.Serializer):
     linenos = serializers.BooleanField(required=False)
     language = serializers.ChoiceField(choices=LANGUAGE_CHOICES, default='python')
     style = serializers.ChoiceField(choices=STYLE_CHOICES, default='friendly')
+
+    class Meta:
+        error_status_codes = {
+            HTTP_400_BAD_REQUEST: 'Bad Request'
+        }
 
     def create(self, validated_data):
         """
