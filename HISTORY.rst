@@ -34,3 +34,8 @@ History
 ------------------
 
 * Fix import issue after renaming
+
+0.9.3 (2017-08-05)
+------------------
+
+* `Issue 27<https://github.com/limdauto/drf_openapi/issues/27>`_: Add support for different response status codes (Enhancement)
