@@ -58,10 +58,10 @@ DRF itself decides to support OpenAPI officially, if at all.
 -------------
 
 - Schema are automatically generated from `serializers <http://www.django-rest-framework.org/api-guide/serializers/>`_
-    - From here onwards, :code:`schema` and :code:`serializer` are used interchangably
+    * From here onwards, :code:`schema` and :code:`serializer` are used interchangably
 - Versioned schema is supported by extending :code:`VersionedSerializers`.
 - Metadata, i.e. versioning, response and request schema, are bound to a view method through the :code:`view_config` decorator.
-- Extra schema information such as response status codes and their descriptions are bound to the serializer :code`Meta` class
+- Extra schema information such as response status codes and their descriptions are bound to the serializer :code:`Meta` class
 - Automatic response validation is optionally provided :code:`view_config(response_serializer=FooSerializer, validate_response=True)`
 
 4. Constraints
