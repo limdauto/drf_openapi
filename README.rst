@@ -4,21 +4,21 @@ DRF OpenAPI
 
 
 .. image:: https://img.shields.io/pypi/v/drf_openapi.svg
-        :target: https://pypi.python.org/pypi/drf_openapi
+    :target: https://pypi.python.org/pypi/drf_openapi
 
 .. image:: https://img.shields.io/travis/limdauto/drf_openapi.svg
-        :target: https://travis-ci.org/limdauto/drf_openapi
+    :target: https://travis-ci.org/limdauto/drf_openapi
 
 .. image:: https://readthedocs.org/projects/drf-openapi/badge/?version=latest
-        :target: https://drf-openapi.readthedocs.io/en/latest/?badge=latest
+    :target: https://drf-openapi.readthedocs.io/en/latest/?badge=latest
         :alt: Documentation Status
 
 .. image:: https://pyup.io/repos/github/limdauto/drf_openapi/shield.svg
-     :target: https://pyup.io/repos/github/limdauto/drf_openapi/
+    :target: https://pyup.io/repos/github/limdauto/drf_openapi/
      :alt: Updates
 
 .. image:: https://badges.gitter.im/drf_openapi/Lobby.svg
-   :alt: Join the chat at https://gitter.im/drf_openapi/Lobby
+    :alt: Join the chat at https://gitter.im/drf_openapi/Lobby
    :target: https://gitter.im/drf_openapi/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
 
 
@@ -26,7 +26,7 @@ Generates OpenAPI-compatible schema from API made with Django Rest Framework. Us
 First-class support for API versioning changelog & method-specific schema definition.
 
 .. figure:: https://raw.githubusercontent.com/limdauto/drf_openapi/master/images/screenshot.png
-   :scale: 80%
+    :scale: 80%
 
 .. contents::
 
@@ -74,7 +74,7 @@ Examples
 Please read the `docs <https://drf-openapi.readthedocs.io>`_ for a quickstart.
 
 Also I have recreated the example in `DRF tutorial <http://www.django-rest-framework.org/tutorial/>`_ with OpenAPI schema enabled
-in `examples <examples/>`_.
+in `<examples/>`_.
 
 License
 ---------
