@@ -20,7 +20,7 @@ from drf_openapi.entities import OpenApiLink, OpenApiDocument
 
 
 class OpenAPICodec(_OpenAPICodec):
-    def encode(self, document: OpenApiDocument, extra=None, **options) -> str:
+    def encode(self, document, extra=None, **options):
         if not isinstance(document, Document):
             raise TypeError('Expected a `coreapi.Document` instance')
 
@@ -29,24 +29,26 @@ class OpenAPICodec(_OpenAPICodec):
             data.update(extra)
 
         return force_bytes(json.dumps(data))
+    encode.__annotations__ = {'document': OpenApiDocument, 'return': str}
 
 
 class OpenAPIRenderer(_OpenAPIRenderer):
 
-    def render(self, data: OpenApiDocument, accepted_media_type: Optional[str] = None,
-               renderer_context: Optional[Dict] = None) -> str:
+    def render(self, data, accepted_media_type=None, renderer_context=None):
         if renderer_context['response'].status_code != status.HTTP_200_OK:
             return JSONRenderer().render(data)
         extra = self.get_customizations()
 
         return OpenAPICodec().encode(data, extra=extra)
+    render.__annotations__ = {'data': OpenApiDocument, 'accepted_media_type': Optional[str],
+                              'renderer_context': Optional[Dict], 'return': str}
 
 
 class SwaggerUIRenderer(_SwaggerUIRenderer):
     template = 'drf_openapi/index.html'
 
 
-def _generate_openapi_object(document: OpenApiDocument) -> OrderedDict:
+def _generate_openapi_object(document):
     """
     Generates root of the Swagger spec.
     """
@@ -68,9 +70,10 @@ def _generate_openapi_object(document: OpenApiDocument) -> OrderedDict:
     swagger['paths'] = _get_paths_object(document)
 
     return swagger
+_generate_openapi_object.__annotations__ = {'document': OpenApiDocument, 'return': OrderedDict}
 
 
-def _get_paths_object(document: Document) -> OrderedDict:
+def _get_paths_object(document):
     paths = OrderedDict()
 
     links = _get_links(document)
@@ -84,9 +87,10 @@ def _get_paths_object(document: Document) -> OrderedDict:
         paths[link.url].update({method: operation})
 
     return paths
+_get_paths_object.__annotations__ = {'document': Document, 'return': OrderedDict}
 
 
-def _get_operation(operation_id: str, link: OpenApiLink, tags: List) -> Dict:
+def _get_operation(operation_id, link, tags):
     encoding = get_encoding(link)
     description = link.description.strip()
     # summary = description.splitlines()[0] if description else None
@@ -107,9 +111,11 @@ def _get_operation(operation_id: str, link: OpenApiLink, tags: List) -> Dict:
     if tags:
         operation['tags'] = tags
     return operation
+_get_operation.__annotations__ = {'operation_id': str, 'link': OpenApiLink, 'tags': List,
+                                  'return': Dict}
 
 
-def _get_responses(link: OpenApiLink) -> Dict:
+def _get_responses(link):
     """ Returns an OpenApi-compliant response
     """
     template = link.response_schema
@@ -117,3 +123,4 @@ def _get_responses(link: OpenApiLink) -> Dict:
     res = {200: template}
     res.update(link.error_status_codes)
     return res
+_get_responses.__annotations__ = {'link': OpenApiLink, 'return': Dict}

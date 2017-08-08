@@ -42,12 +42,12 @@ class VersionedSerializers:
         ('>1.3, <=1.6', MeSerializer16)
         ('>1.6', MeSerializer)
     )
-    
+
     """
     VERSION_MAP = ()
 
     @classmethod
-    def get(cls, request_version: str):
+    def get(cls, request_version):
         for allowed_version, schema in cls.VERSION_MAP:
             distinct_versions = [version.strip() for version in allowed_version.split(',')]
             matched = True
@@ -73,7 +73,8 @@ class VersionedSerializers:
             if matched:
                 return schema
 
-        raise ValueError(f'Invalid request version {request_version}')
+        raise ValueError('Invalid request version {}'.format(request_version))
+    get.__func__.__annotations__ = {'request_version': str}
 
 
 class OpenApiSchemaGenerator(SchemaGenerator):
