@@ -6,8 +6,8 @@ from drf_openapi.entities import VersionedSerializers
 from rest_framework.response import Response
 
 
-def view_config(request_serializer=None, response_serializer=None, validate_response=False) -> Callable:
-    def decorator(view_method: Callable) -> Callable:
+def view_config(request_serializer=None, response_serializer=None, validate_response=False):
+    def decorator(view_method):
 
         view_method.request_serializer = request_serializer
         view_method.response_serializer = response_serializer
@@ -33,4 +33,6 @@ def view_config(request_serializer=None, response_serializer=None, validate_resp
             return response
 
         return wrapper
+    decorator.__annotations__ = {'view_method': Callable, 'return': Callable}
     return decorator
+view_config.__annotations__ = {'return': Callable}
