@@ -10,6 +10,8 @@ from django.db import models
 from openapi_codec.encode import _get_parameters
 from pkg_resources import parse_version
 from rest_framework import serializers
+from rest_framework.fields import IntegerField, URLField
+from rest_framework.pagination import PageNumberPagination, LimitOffsetPagination, CursorPagination
 from rest_framework.schemas import SchemaGenerator, insert_into, get_pk_description, field_to_schema
 
 
@@ -174,6 +176,14 @@ class OpenApiSchemaGenerator(SchemaGenerator):
                 description = description + '\n\n**Response Description:**\n' + res_doc
             response_serializer_class = response_serializer_class.get(version)
 
+        if not response_serializer_class and method_name in ('list', 'retrieve'):
+            if hasattr(view, 'get_serializer_class'):
+                response_serializer_class = view.get_serializer_class()
+            elif hasattr(view, 'serializer_class'):
+                response_serializer_class = view.serializer_class
+            if response_serializer_class and method_name == 'list':
+                response_serializer_class = self.get_paginator_serializer(view,
+                                                                          response_serializer_class)
         response_schema, error_status_codes = self.get_response_object(
             response_serializer_class, method_func.__doc__) if response_serializer_class else ({}, {})
 
@@ -186,6 +196,28 @@ class OpenApiSchemaGenerator(SchemaGenerator):
             fields=fields,
             description=description
         )
+
+    def get_paginator_serializer(self, view, child_serializer_class):
+        class BaseFakeListSerializer(serializers.Serializer):
+            results = child_serializer_class(many=True)
+
+        class FakePrevNextListSerializer(BaseFakeListSerializer):
+            next = URLField()
+            previous = URLField()
+
+        pager = view.pagination_class
+        if hasattr(pager, 'default_pager'):
+            # Must be a ProxyPagination
+            pager = pager.default_pager
+
+        if issubclass(pager, (PageNumberPagination, LimitOffsetPagination)):
+            class FakeListSerializer(FakePrevNextListSerializer):
+                count = IntegerField()
+            return FakeListSerializer
+        elif issubclass(pager, CursorPagination):
+            return FakePrevNextListSerializer
+
+        return BaseFakeListSerializer
 
     def get_path_fields(self, path, method, view):
         """
