@@ -45,3 +45,8 @@ History
 
 * Add Python 2.7 compatibility (thanks `tuffnatty <https://github.com/limdauto/drf_openapi/pull/35>`_)
 * Add support for ModelViewSet (thanks `tuffnatty <https://github.com/limdauto/drf_openapi/pull/36>`_)
+
+0.9.6 (2017-08-12)
+------------------
+
+* Fix type display for child of ListSerializer/ListField (`Issue 28 <https://github.com/limdauto/drf_openapi/issues/28>`_)
