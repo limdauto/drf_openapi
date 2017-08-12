@@ -11,7 +11,7 @@ class SnippetList(APIView):
     """
     List all snippets, or create a new snippet.
     """
-    
+
     @view_config(response_serializer=SnippetSerializer)
     def get(self, request, version, format=None):
         snippets = Snippet.objects.all()

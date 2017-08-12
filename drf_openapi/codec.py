@@ -4,19 +4,17 @@ and https://github.com/marcgibbons/django-rest-swagger/blob/master/rest_framewor
 """
 import json
 from collections import OrderedDict
-from typing import Dict, List, Optional
 
+import coreschema
 from coreapi import Document
 from coreapi.compat import urlparse, force_bytes
 from openapi_codec import OpenAPICodec as _OpenAPICodec
-from openapi_codec.encode import _get_links, _get_parameters
-from openapi_codec.utils import get_method, get_encoding
+from openapi_codec.encode import _get_links, _get_field_description
+from openapi_codec.utils import get_method, get_encoding, get_location
 from rest_framework import status
 from rest_framework.renderers import JSONRenderer
 from rest_framework_swagger.renderers import OpenAPIRenderer as _OpenAPIRenderer, \
     SwaggerUIRenderer as _SwaggerUIRenderer
-
-from drf_openapi.entities import OpenApiLink, OpenApiDocument
 
 
 class OpenAPICodec(_OpenAPICodec):
@@ -29,7 +27,6 @@ class OpenAPICodec(_OpenAPICodec):
             data.update(extra)
 
         return force_bytes(json.dumps(data))
-    encode.__annotations__ = {'document': OpenApiDocument, 'return': str}
 
 
 class OpenAPIRenderer(_OpenAPIRenderer):
@@ -40,8 +37,6 @@ class OpenAPIRenderer(_OpenAPIRenderer):
         extra = self.get_customizations()
 
         return OpenAPICodec().encode(data, extra=extra)
-    render.__annotations__ = {'data': OpenApiDocument, 'accepted_media_type': Optional[str],
-                              'renderer_context': Optional[Dict], 'return': str}
 
 
 class SwaggerUIRenderer(_SwaggerUIRenderer):
@@ -70,7 +65,6 @@ def _generate_openapi_object(document):
     swagger['paths'] = _get_paths_object(document)
 
     return swagger
-_generate_openapi_object.__annotations__ = {'document': OpenApiDocument, 'return': OrderedDict}
 
 
 def _get_paths_object(document):
@@ -87,7 +81,6 @@ def _get_paths_object(document):
         paths[link.url].update({method: operation})
 
     return paths
-_get_paths_object.__annotations__ = {'document': Document, 'return': OrderedDict}
 
 
 def _get_operation(operation_id, link, tags):
@@ -111,8 +104,6 @@ def _get_operation(operation_id, link, tags):
     if tags:
         operation['tags'] = tags
     return operation
-_get_operation.__annotations__ = {'operation_id': str, 'link': OpenApiLink, 'tags': List,
-                                  'return': Dict}
 
 
 def _get_responses(link):
@@ -123,4 +114,106 @@ def _get_responses(link):
     res = {200: template}
     res.update(link.error_status_codes)
     return res
-_get_responses.__annotations__ = {'link': OpenApiLink, 'return': Dict}
+
+
+def _get_field_type(field):
+    type_name_map = {
+        coreschema.String: 'string',
+        coreschema.Integer: 'integer',
+        coreschema.Number: 'number',
+        coreschema.Boolean: 'boolean',
+        coreschema.Array: 'array',
+        coreschema.Object: 'object',
+    }
+
+    if getattr(field, 'type', None) is not None:
+        # Deprecated
+        return field.type
+
+    if field.__class__ in type_name_map:
+        return type_name_map[field.__class__]
+
+    if field.schema is None:
+        return 'string'
+
+    return type_name_map.get(field.schema.__class__, 'string')
+
+
+def _get_parameters(link, encoding):
+    """
+    Generates Swagger Parameter Item object.
+    """
+    parameters = []
+    properties = {}
+    required = []
+
+    for field in link.fields:
+        location = get_location(link, field)
+        field_description = _get_field_description(field)
+        field_type = _get_field_type(field)
+        if location == 'form':
+            if encoding in ('multipart/form-data', 'application/x-www-form-urlencoded'):
+                # 'formData' in swagger MUST be one of these media types.
+                parameter = {
+                    'name': field.name,
+                    'required': field.required,
+                    'in': 'formData',
+                    'description': field_description,
+                    'type': field_type,
+                }
+                if field_type == 'array':
+                    parameter['items'] = {'type': _get_field_type(field.schema.items)}
+                parameters.append(parameter)
+            else:
+                # Expand coreapi fields with location='form' into a single swagger
+                # parameter, with a schema containing multiple properties.
+
+                schema_property = {
+                    'description': field_description,
+                    'type': field_type,
+                }
+                if field_type == 'array':
+                    schema_property['items'] = {'type': _get_field_type(field.schema.items)}
+                properties[field.name] = schema_property
+                if field.required:
+                    required.append(field.name)
+        elif location == 'body':
+            if encoding == 'application/octet-stream':
+                # https://github.com/OAI/OpenAPI-Specification/issues/50#issuecomment-112063782
+                schema = {'type': 'string', 'format': 'binary'}
+            else:
+                schema = {}
+            parameter = {
+                'name': field.name,
+                'required': field.required,
+                'in': location,
+                'description': field_description,
+                'schema': schema
+            }
+            parameters.append(parameter)
+        else:
+            parameter = {
+                'name': field.name,
+                'required': field.required,
+                'in': location,
+                'description': field_description,
+                'type': field_type or 'string',
+            }
+            if field_type == 'array':
+                parameter['items'] = {'type': _get_field_type(field.schema.items)}
+            parameters.append(parameter)
+
+    if properties:
+        parameter = {
+            'name': 'data',
+            'in': 'body',
+            'schema': {
+                'type': 'object',
+                'properties': properties
+            }
+        }
+        if required:
+            parameter['schema']['required'] = required
+        parameters.append(parameter)
+
+    return parameters
