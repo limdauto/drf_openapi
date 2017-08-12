@@ -12,6 +12,7 @@ class SnippetSerializerV1(serializers.Serializer):
     linenos = serializers.BooleanField(required=False)
     language = serializers.ChoiceField(choices=LANGUAGE_CHOICES, default='python')
     style = serializers.ChoiceField(choices=STYLE_CHOICES, default='friendly')
+    comments = serializers.ListField(child=serializers.CharField(), allow_empty=True, allow_null=True, required=False)
 
     class Meta:
         error_status_codes = {
@@ -33,6 +34,7 @@ class SnippetSerializerV1(serializers.Serializer):
         instance.linenos = validated_data.get('linenos', instance.linenos)
         instance.language = validated_data.get('language', instance.language)
         instance.style = validated_data.get('style', instance.style)
+        instance.comments = validated_data.get('comments', instance.style)
         instance.save()
         return instance
 
