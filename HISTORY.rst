@@ -39,3 +39,9 @@ History
 ------------------
 
 * Add support for different response status codes (`Issue 27 <https://github.com/limdauto/drf_openapi/issues/27>`_)
+
+0.9.5 (2017-08-12)
+------------------
+
+* Add Python 2.7 compatibility (thanks `tuffnatty <https://github.com/limdauto/drf_openapi/pull/35>`_)
+* Add support for ModelViewSet (thanks `tuffnatty <https://github.com/limdauto/drf_openapi/pull/36>`_)
