@@ -319,11 +319,17 @@ class OpenApiSchemaGenerator(SchemaGenerator):
         nested_obj = {}
 
         for field in serializer.fields.values():
+            # If field is a serializer, attempt to get its schema.
             if isinstance(field, serializers.Serializer):
-                nested_obj[field.field_name] = self.get_response_object(field.__class__, None)[0]['schema']
-                nested_obj[field.field_name]['description'] = field.help_text
-                continue
+                subfield_schema = self.get_response_object(field.__class__, None)[0].get('schema')
 
+                # If the schema exists, use it as the nested_obj
+                if subfield_schema is not None:
+                    nested_obj[field.field_name] = subfield_schema
+                    nested_obj[field.field_name]['description'] = field.help_text
+                    continue
+
+            # Otherwise, carry-on and use the field's schema.
             fields.append(Field(
                 name=field.field_name,
                 location='form',
