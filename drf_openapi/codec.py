@@ -133,7 +133,7 @@ def _get_field_type(field):
     if field.__class__ in type_name_map:
         return type_name_map[field.__class__]
 
-    if field.schema is None:
+    if getattr(field, 'schema', None) is None:
         return 'string'
 
     return type_name_map.get(field.schema.__class__, 'string')

@@ -13,7 +13,7 @@ def view_config(request_serializer=None, response_serializer=None, validate_resp
         view_method.response_serializer = response_serializer
 
         @wraps(view_method)
-        def wrapper(instance, request, version, *args, **kwargs):
+        def wrapper(instance, request, version=None, *args, **kwargs):
             if request_serializer and issubclass(request_serializer, VersionedSerializers):
                 instance.request_serializer = request_serializer.get(version)
             else:
@@ -24,7 +24,7 @@ def view_config(request_serializer=None, response_serializer=None, validate_resp
             else:
                 instance.response_serializer = response_serializer
 
-            response = view_method(instance, request, version, *args, **kwargs)
+            response = view_method(instance, request, version=version, *args, **kwargs)
             if validate_response:
                 response_validator = instance.response_serializer(data=response.data)
                 response_validator.is_valid(raise_exception=True)
