@@ -50,3 +50,8 @@ History
 ------------------
 
 * Fix type display for child of ListSerializer/ListField (`Issue 28 <https://github.com/limdauto/drf_openapi/issues/28>`_)
+
+0.9.7 (2017-09-12)
+------------------
+
+* Improve permission for schema view (`Issue 31 <https://github.com/limdauto/drf_openapi/issues/31>`_)
