@@ -107,3 +107,16 @@ Support for error status codes is provided through the use of :code:`Meta` class
            }
 
 In later iteration, I will add support for sample error response.
+
+5. Overwriting default permission
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+By default, the schema view is available for staff member only. If you want to override this behavior, simply provide
+another view handler for the schema endpoint
+
+.. code:: python
+
+   from your.project import schema_permission_decorator
+   from drf_openapi.views import get_schema_view
+
+   url('schema/$', schema_permission_decorator(get_schema_view(url='', title="API Documentation")), name='api_schema')
