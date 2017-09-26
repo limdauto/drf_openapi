@@ -71,8 +71,6 @@ Currently DRF OpenAPI only supports DRF project that has `versioning <http://www
 I have only tested `URLPathVersioning <http://www.django-rest-framework.org/api-guide/versioning/#urlpathversioning>`_ but I intend to suppor the full range of
 versioning scheme supported by DRF.
 
-Also the schema view is limited to staff member for now. I plan to add more granular permission very soon.
-
 5. Examples
 ------------
 
