@@ -76,7 +76,7 @@ versioning scheme supported by DRF.
 
 Please read the `docs <https://drf-openapi.readthedocs.io>`_ for a quickstart.
 
-Also I have recreated the example in `DRF tutorial <http://www.django-rest-framework.org/tutorial/>`_ with OpenAPI schema enabled
+Also I have recreated the example in `DRF tutorial <http://www.django-rest-framework.org/tutorial/quickstart/>`_ with OpenAPI schema enabled
 in `<examples/>`_.
 
 6. License

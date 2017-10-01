@@ -16,9 +16,11 @@ Including another URLconf
 from django.conf.urls import url, include
 from django.contrib import admin
 
+from examples.views import MySchemaView
+
 API_PREFIX = r'^v(?P<version>[0-9]+\.[0-9]+)'
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(f'{API_PREFIX}/', include('drf_openapi.urls')),
+    url(f'{API_PREFIX}/schema/', MySchemaView.as_view(), name='api_schema'),
     url(f'{API_PREFIX}/snippets/', include('snippets.urls')),
 ]
