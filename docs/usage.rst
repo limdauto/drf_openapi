@@ -108,15 +108,27 @@ Support for error status codes is provided through the use of :code:`Meta` class
 
 In later iteration, I will add support for sample error response.
 
-5. Overwriting default permission
+5. Customization of the API View
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-By default, the schema view is available for staff member only. If you want to override this behavior, simply provide
-another view handler for the schema endpoint
+You can customize the API View that renders the schema documentation by subclassing it. It's important to note that
+it is just a DRF `APIView <http://www.django-rest-framework.org/api-guide/views/>`_ so it inherits all attributes
+available in an APIView. Therefore, if you want to customize the permissions to allow public access
+to your API documentation for example, which by default is staff-only
+`IsAdminUser <http://www.django-rest-framework.org/api-guide/permissions/#isadminuser>`_, you can do the following
 
 .. code:: python
 
-   from your.project import schema_permission_decorator
-   from drf_openapi.views import get_schema_view
+   # in your.project.views
+   from rest_framework import permissions
+   from drf_openapi.views import SchemaView
 
-   url('schema/$', schema_permission_decorator(get_schema_view(url='', title="API Documentation")), name='api_schema')
+   class MySchemaView(SchemaView):
+       permission_classes = (permissions.AllowAny,)
+
+   # in your.project.urls
+   from your.project.views import MySchemaView
+   url('schema/$', MySchemaView.as_view(title='My Awesome API'), name='api_schema')
+
+Take a look at the `example project <https://github.com/limdauto/drf_openapi/blob/master/examples/snippets/urls.py>`_
+to see the default URL handler in action.

@@ -1,22 +1,22 @@
 # coding=utf-8
-from rest_framework import response
-from rest_framework.decorators import api_view, renderer_classes
+from rest_framework import response, permissions
 from rest_framework.renderers import CoreJSONRenderer
+from rest_framework.views import APIView
 
 from drf_openapi.codec import OpenAPIRenderer, SwaggerUIRenderer
 from drf_openapi.entities import OpenApiSchemaGenerator
 
 
-def get_schema_view(url, title):
+class SchemaView(APIView):
+    renderer_classes = (CoreJSONRenderer, SwaggerUIRenderer, OpenAPIRenderer)
+    permission_classes = (permissions.IsAdminUser,)
+    url = ''
+    title = 'API Documentation'
 
-    @api_view()
-    @renderer_classes([CoreJSONRenderer, SwaggerUIRenderer, OpenAPIRenderer])
-    def schema_view(request, version):
+    def get(self, request, version):
         generator = OpenApiSchemaGenerator(
             version=version,
-            url=url,
-            title=title
+            url=self.url,
+            title=self.title
         )
         return response.Response(generator.get_schema(request))
-
-    return schema_view
