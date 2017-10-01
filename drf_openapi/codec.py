@@ -17,6 +17,80 @@ from rest_framework_swagger.renderers import OpenAPIRenderer as _OpenAPIRenderer
     SwaggerUIRenderer as _SwaggerUIRenderer
 
 
+class OpenApiFieldParser:
+
+    def __init__(self, link, field):
+        self.field = field
+        self.field_description = _get_field_description(field)
+        self.field_type = _get_field_type(field)
+        self.location = get_location(link, field)
+
+    @property
+    def location_string(self):
+        return 'formData' if self.location == 'form' else self.location
+
+    def parse_array_field(self):
+        parameter = {
+            'name': self.field.name,
+            'required': self.field.required,
+            'description': self.field_description,
+            'type': self.field_type,
+        }
+
+        items_type = _get_field_type(self.field.schema.items)
+        if items_type == 'object':
+            parameter['items'] = {
+                'type': items_type,
+                'properties': {
+                    name: {
+                        'description': _get_field_description(prop),
+                        'type': _get_field_type(prop)
+                    } for name, prop in self.field.schema.items.properties.items()
+                }
+            }
+        else:
+            parameter['items'] = {
+                'type': items_type,
+                'description': _get_field_description(self.field.schema.items)
+            }
+
+        return parameter
+
+    def as_parameter(self):
+        if self.field_type == 'array':
+            param = self.parse_array_field()
+        else:
+            param = {
+                'name': self.field.name,
+                'required': self.field.required,
+                'description': self.field_description,
+                'type': self.field_type
+            }
+
+        param['in'] = self.location_string
+        return param
+
+    def as_body_parameter(self, encoding):
+        if encoding == 'application/octet-stream':
+            # https://github.com/OAI/OpenAPI-Specification/issues/50#issuecomment-112063782
+            schema = {'type': 'string', 'format': 'binary'}
+        else:
+            schema = {}
+
+        param = self.as_parameter()
+        param['schema'] = schema
+        return param
+
+    def as_schema_property(self):
+        if self.field_type == 'array':
+            return self.parse_array_field()
+
+        return {
+            'description': self.field_description,
+            'type': self.field_type,
+        }
+
+
 class OpenAPICodec(_OpenAPICodec):
     def encode(self, document, extra=None, **options):
         if not isinstance(document, Document):
@@ -148,60 +222,21 @@ def _get_parameters(link, encoding):
     required = []
 
     for field in link.fields:
-        location = get_location(link, field)
-        field_description = _get_field_description(field)
-        field_type = _get_field_type(field)
-        if location == 'form':
+        parser = OpenApiFieldParser(link, field)
+        if parser.location == 'form':
             if encoding in ('multipart/form-data', 'application/x-www-form-urlencoded'):
                 # 'formData' in swagger MUST be one of these media types.
-                parameter = {
-                    'name': field.name,
-                    'required': field.required,
-                    'in': 'formData',
-                    'description': field_description,
-                    'type': field_type,
-                }
-                if field_type == 'array':
-                    parameter['items'] = {'type': _get_field_type(field.schema.items)}
-                parameters.append(parameter)
+                parameters.append(parser.as_parameter())
             else:
                 # Expand coreapi fields with location='form' into a single swagger
                 # parameter, with a schema containing multiple properties.
-
-                schema_property = {
-                    'description': field_description,
-                    'type': field_type,
-                }
-                if field_type == 'array':
-                    schema_property['items'] = {'type': _get_field_type(field.schema.items)}
-                properties[field.name] = schema_property
+                properties[field.name] = parser.as_schema_property()
                 if field.required:
                     required.append(field.name)
-        elif location == 'body':
-            if encoding == 'application/octet-stream':
-                # https://github.com/OAI/OpenAPI-Specification/issues/50#issuecomment-112063782
-                schema = {'type': 'string', 'format': 'binary'}
-            else:
-                schema = {}
-            parameter = {
-                'name': field.name,
-                'required': field.required,
-                'in': location,
-                'description': field_description,
-                'schema': schema
-            }
-            parameters.append(parameter)
+        elif parser.location == 'body':
+            parameters.append(parser.as_body_parameter(encoding))
         else:
-            parameter = {
-                'name': field.name,
-                'required': field.required,
-                'in': location,
-                'description': field_description,
-                'type': field_type or 'string',
-            }
-            if field_type == 'array':
-                parameter['items'] = {'type': _get_field_type(field.schema.items)}
-            parameters.append(parameter)
+            parameters.append(parser.as_parameter())
 
     if properties:
         parameter = {

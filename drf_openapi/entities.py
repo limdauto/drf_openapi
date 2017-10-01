@@ -183,8 +183,8 @@ class OpenApiSchemaGenerator(SchemaGenerator):
             elif hasattr(view, 'serializer_class'):
                 response_serializer_class = view.serializer_class
             if response_serializer_class and method_name == 'list':
-                response_serializer_class = self.get_paginator_serializer(view,
-                                                                          response_serializer_class)
+                response_serializer_class = self.get_paginator_serializer(
+                    view, response_serializer_class)
         response_schema, error_status_codes = self.get_response_object(
             response_serializer_class, method_func.__doc__) if response_serializer_class else ({}, {})
 
