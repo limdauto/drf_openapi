@@ -10,6 +10,11 @@ class LanguageSerializer(serializers.Serializer):
         choices=LANGUAGE_CHOICES, default='python', help_text='The name of the programming language')
 
 
+class ExampleProjectsSerializer(serializers.Serializer):
+    project_name = serializers.CharField(help_text='Name of the project')
+    github_repo = serializers.CharField(required=False, help_text='Github repository of the project')
+
+
 class SnippetSerializerV1(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     title = serializers.CharField(required=False, allow_blank=True, max_length=100)
@@ -18,6 +23,7 @@ class SnippetSerializerV1(serializers.Serializer):
     language = LanguageSerializer()
     style = serializers.ChoiceField(choices=STYLE_CHOICES, default='friendly')
     lines = serializers.ListField(child=serializers.IntegerField(), allow_empty=True, allow_null=True, required=False)
+    example_projects = serializers.ListSerializer(child=ExampleProjectsSerializer())
 
     class Meta:
         error_status_codes = {
