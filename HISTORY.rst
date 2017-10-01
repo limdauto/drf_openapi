@@ -55,3 +55,8 @@ History
 ------------------
 
 * Improve permission for schema view (`Issue 31 <https://github.com/limdauto/drf_openapi/issues/31>`_)
+
+0.9.8 (2017-10-01)
+------------------
+
+* Turn schema view into a class-based view for easier customization
