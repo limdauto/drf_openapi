@@ -60,3 +60,8 @@ History
 ------------------
 
 * Turn schema view into a class-based view for easier customization
+
+0.9.9 (2017-10-01)
+------------------
+
+* Another fix for ListSerializer/ListField (`Issue 28 <https://github.com/limdauto/drf_openapi/issues/28>`_)
