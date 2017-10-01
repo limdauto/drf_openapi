@@ -7,6 +7,21 @@ from rest_framework.response import Response
 from rest_framework import status
 
 
+_FAKE_SNIPPETS = [
+    {
+        'id': 1,
+        'title': 'foo',
+        'code': 'print("hello")',
+        'language': {'name': 'python'},
+        'lines': [1, 2, 3],
+        'example_projects': [{
+            'project_name': 'drf_openapi',
+            'github_repo': 'https://github.com/limdauto/drf_openapi/'
+        }]
+    }
+]
+
+
 class SnippetList(APIView):
     """
     List all snippets, or create a new snippet.
@@ -14,8 +29,7 @@ class SnippetList(APIView):
 
     @view_config(response_serializer=SnippetSerializer)
     def get(self, request, version, format=None):
-        snippets = Snippet.objects.all()
-        res = self.response_serializer(snippets, many=True)
+        res = self.response_serializer(data=_FAKE_SNIPPETS, many=True)
         res.is_valid(raise_exception=True)
         return Response(res.validated_data)
 

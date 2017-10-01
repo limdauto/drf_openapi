@@ -12,7 +12,7 @@ class LanguageSerializer(serializers.Serializer):
 
 class ExampleProjectsSerializer(serializers.Serializer):
     project_name = serializers.CharField(help_text='Name of the project')
-    github_repo = serializers.CharField(required=False, help_text='Github repository of the project')
+    github_repo = serializers.CharField(required=True, help_text='Github repository of the project')
 
 
 class SnippetSerializerV1(serializers.Serializer):
