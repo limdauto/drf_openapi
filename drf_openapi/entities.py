@@ -7,6 +7,7 @@ import uritemplate
 from coreapi import Link, Document, Field
 from coreapi.compat import force_text
 from django.db import models
+from django.utils.functional import Promise
 from pkg_resources import parse_version
 from rest_framework import serializers
 from rest_framework.fields import IntegerField, URLField
@@ -301,12 +302,14 @@ class OpenApiSchemaGenerator(SchemaGenerator):
                 continue
 
             required = field.required and method != 'PATCH'
+            # if the attribute ('help_text') of this field is a lazy translation object, force it to generate a string
+            description = str(field.help_text) if isinstance(field.help_text, Promise) else field.help_text
             field = Field(
                 name=field.field_name,
                 location='form',
                 required=required,
                 schema=field_to_schema(field),
-                description=field.help_text,
+                description=description,
             )
             fields.append(field)
 
