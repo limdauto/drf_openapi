@@ -12,7 +12,10 @@ from pkg_resources import parse_version
 from rest_framework import serializers
 from rest_framework.fields import IntegerField, URLField
 from rest_framework.pagination import PageNumberPagination, LimitOffsetPagination, CursorPagination
-from rest_framework.schemas import SchemaGenerator, insert_into, get_pk_description, field_to_schema
+from rest_framework.schemas import SchemaGenerator
+from rest_framework.schemas.generators import insert_into
+from rest_framework.schemas.inspectors import get_pk_description, field_to_schema
+from rest_framework.schemas.utils import is_list_view
 
 from drf_openapi.codec import _get_parameters
 
