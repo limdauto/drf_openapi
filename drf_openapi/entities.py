@@ -12,7 +12,9 @@ from pkg_resources import parse_version
 from rest_framework import serializers
 from rest_framework.fields import IntegerField, URLField
 from rest_framework.pagination import PageNumberPagination, LimitOffsetPagination, CursorPagination
-from rest_framework.schemas import SchemaGenerator, insert_into, get_pk_description, field_to_schema
+from rest_framework.schemas import SchemaGenerator
+from rest_framework.schemas.generators import insert_into, distribute_links, LinkNode
+from rest_framework.schemas.inspectors import get_pk_description, field_to_schema
 
 from drf_openapi.codec import _get_parameters
 
@@ -99,6 +101,7 @@ class OpenApiSchemaGenerator(SchemaGenerator):
         if not url and request is not None:
             url = request.build_absolute_uri()
 
+        distribute_links(links)
         return OpenApiDocument(
             version=self.version,
             title=self.title, description=self.description,
@@ -110,7 +113,7 @@ class OpenApiSchemaGenerator(SchemaGenerator):
         Return a dictionary containing all the links that should be
         included in the API schema.
         """
-        links = OrderedDict()
+        links = LinkNode()
 
         # Generate (path, method, view) given (path, method, callback).
         paths = []
@@ -152,15 +155,15 @@ class OpenApiSchemaGenerator(SchemaGenerator):
     def get_link(self, path, method, view, version=None):
         fields = self.get_path_fields(path, method, view)
         fields += self.get_serializer_fields(path, method, view, version=version)
-        fields += self.get_pagination_fields(path, method, view)
-        fields += self.get_filter_fields(path, method, view)
+        fields += view.schema.get_pagination_fields(path, method)
+        fields += view.schema.get_filter_fields(path, method)
 
         if fields and any([field.location in ('form', 'body') for field in fields]):
-            encoding = self.get_encoding(path, method, view)
+            encoding = view.schema.get_encoding(path, method)
         else:
             encoding = None
 
-        description = self.get_description(path, method, view)
+        description = view.schema.get_description(path, method)
 
         method_name = getattr(view, 'action', method.lower())
         method_func = getattr(view, method_name, None)
