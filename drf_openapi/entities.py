@@ -210,6 +210,10 @@ class OpenApiSchemaGenerator(SchemaGenerator):
             next = URLField()
             previous = URLField()
 
+        # Validate if the view has a pagination_class
+        if not (hasattr(view, 'pagination_class')) or view.pagination_class is None:
+            return BaseFakeListSerializer
+
         pager = view.pagination_class
         if hasattr(pager, 'default_pager'):
             # Must be a ProxyPagination
