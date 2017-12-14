@@ -28,7 +28,7 @@ test_requirements = [
 
 setup(
     name='drf_openapi',
-    version='1.0.1',
+    version='1.1.0',
     description="Utilities to generate OpenAPI-compatible schema from API made with Django Rest Framework",
     long_description=readme + '\n\n' + history,
     author="Lim H.",
