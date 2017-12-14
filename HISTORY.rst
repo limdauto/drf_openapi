@@ -65,3 +65,14 @@ History
 ------------------
 
 * Another fix for ListSerializer/ListField (`Issue 28 <https://github.com/limdauto/drf_openapi/issues/28>`_)
+
+1.0.1 (2017-12-14)
+------------------
+
+* Fix DRF 3.7 compatibility issue
+* Added (`werwty <https://github.com/werwty>`_) as a maintainer
+
+1.1.0 (2017-12-14)
+------------------
+
+* Fix viewset that doesn't have pagination_class (`Issue 84 <https://github.com/limdauto/drf_openapi/issues/84>`_) and (`Issue 92 <https://github.com/limdauto/drf_openapi/issues/92>`_)
