@@ -291,6 +291,22 @@ class OpenApiSchemaGenerator(SchemaGenerator):
 
         return None
 
+    def fallback_schema_from_field(self, field):
+        """ Fallback schema for field that isn't inspected properly by DRF
+        and probably won't land in upstream canon due to its hacky nature only for doc purposes
+        """
+        title = force_text(field.label) if field.label else ''
+        description = force_text(field.help_text) if field.help_text else ''
+
+        # since we can't really inspect dictfield and jsonfield, at least display object as type
+        # instead of string
+        if isinstance(field, (serializers.DictField, serializers.JSONField)):
+            return coreschema.Object(
+                properties={},
+                title=title,
+                description=description
+            )
+
 
     def get_serializer_fields(self, path, method, view, version=None, method_func=None):
         """
@@ -326,11 +342,12 @@ class OpenApiSchemaGenerator(SchemaGenerator):
             required = field.required and method != 'PATCH'
             # if the attribute ('help_text') of this field is a lazy translation object, force it to generate a string
             description = str(field.help_text) if isinstance(field.help_text, Promise) else field.help_text
+            fallback_schema = self.fallback_schema_from_field(field)
             field = Field(
                 name=field.field_name,
                 location='form',
                 required=required,
-                schema=field_to_schema(field),
+                schema=fallback_schema if fallback_schema else field_to_schema(field),
                 description=description,
             )
             fields.append(field)
@@ -355,11 +372,12 @@ class OpenApiSchemaGenerator(SchemaGenerator):
                     continue
 
             # Otherwise, carry-on and use the field's schema.
+            fallback_schema = self.fallback_schema_from_field(field)
             fields.append(Field(
                 name=field.field_name,
                 location='form',
                 required=field.required,
-                schema=field_to_schema(field)
+                schema=fallback_schema if fallback_schema else field_to_schema(field),
             ))
 
         res = _get_parameters(Link(fields=fields), None)
