@@ -76,3 +76,8 @@ History
 ------------------
 
 * Fix viewset that doesn't have pagination_class (`Issue 84 <https://github.com/limdauto/drf_openapi/issues/84>`_) and (`Issue 92 <https://github.com/limdauto/drf_openapi/issues/92>`_)
+
+1.2.0 (2017-12-20)
+------------------
+
+* Make serializer_class optional (`Issue 57 <https://github.com/limdauto/drf_openapi/issues/57>`_)
