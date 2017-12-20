@@ -153,8 +153,11 @@ class OpenApiSchemaGenerator(SchemaGenerator):
         return '\n'.join(doc)
 
     def get_link(self, path, method, view, version=None):
+        method_name = getattr(view, 'action', method.lower())
+        method_func = getattr(view, method_name, None)
+
         fields = self.get_path_fields(path, method, view)
-        fields += self.get_serializer_fields(path, method, view, version=version)
+        fields += self.get_serializer_fields(path, method, view, version=version, method_func=method_func)
         fields += view.schema.get_pagination_fields(path, method)
         fields += view.schema.get_filter_fields(path, method)
 
@@ -164,9 +167,6 @@ class OpenApiSchemaGenerator(SchemaGenerator):
             encoding = None
 
         description = view.schema.get_description(path, method)
-
-        method_name = getattr(view, 'action', method.lower())
-        method_func = getattr(view, method_name, None)
 
         request_serializer_class = getattr(method_func, 'request_serializer', None)
         if request_serializer_class and issubclass(request_serializer_class, VersionedSerializers):
@@ -275,7 +275,24 @@ class OpenApiSchemaGenerator(SchemaGenerator):
 
         return fields
 
-    def get_serializer_fields(self, path, method, view, version=None):
+    def get_serializer_class(self, view, method_func):
+        """
+        Try to get the serializer class from view method.
+        If view method don't have request serializer, fallback to serializer_class on view class
+        """
+        if hasattr(method_func, 'request_serializer'):
+            return getattr(method_func, 'request_serializer')
+
+        if hasattr(view, 'serializer_class'):
+            return getattr(view, 'serializer_class')
+
+        if hasattr(view, 'get_serializer_class'):
+            return getattr(view, 'get_serializer_class')()
+
+        return None
+
+
+    def get_serializer_fields(self, path, method, view, version=None, method_func=None):
         """
         Return a list of `coreapi.Field` instances corresponding to any
         request body input, as determined by the serializer class.
@@ -283,13 +300,11 @@ class OpenApiSchemaGenerator(SchemaGenerator):
         if method not in ('PUT', 'PATCH', 'POST'):
             return []
 
-        if not hasattr(view, 'serializer_class') and not hasattr(view, 'get_serializer_class'):
+        serializer_class = self.get_serializer_class(view, method_func)
+        if not serializer_class:
             return []
 
-        serializer_class = view.get_serializer_class() if hasattr(view, 'get_serializer_class') \
-            else view.serializer_class
         serializer = serializer_class()
-
         if isinstance(serializer, serializers.ListSerializer):
             return [
                 Field(
