@@ -307,14 +307,15 @@ class OpenApiSchemaGenerator(SchemaGenerator):
                 description=description
             )
 
-
     def get_serializer_fields(self, path, method, view, version=None, method_func=None):
         """
         Return a list of `coreapi.Field` instances corresponding to any
         request body input, as determined by the serializer class.
         """
-        if method not in ('PUT', 'PATCH', 'POST'):
-            return []
+        if method in ('PUT', 'PATCH', 'POST'):
+            location = 'form'
+        else:
+            location = 'query'
 
         serializer_class = self.get_serializer_class(view, method_func)
         if not serializer_class:
@@ -325,7 +326,7 @@ class OpenApiSchemaGenerator(SchemaGenerator):
             return [
                 Field(
                     name='data',
-                    location='body',
+                    location=location,
                     required=True,
                     schema=coreschema.Array()
                 )
@@ -345,7 +346,7 @@ class OpenApiSchemaGenerator(SchemaGenerator):
             fallback_schema = self.fallback_schema_from_field(field)
             field = Field(
                 name=field.field_name,
-                location='form',
+                location=location,
                 required=required,
                 schema=fallback_schema if fallback_schema else field_to_schema(field),
                 description=description,
