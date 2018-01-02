@@ -81,3 +81,8 @@ History
 ------------------
 
 * Make serializer_class optional (`Issue 57 <https://github.com/limdauto/drf_openapi/issues/57>`_)
+
+1.3.0 (2018-01-02)
+------------------
+
+* Support GET request query parameters
