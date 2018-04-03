@@ -20,6 +20,8 @@ DRF OpenAPI
 .. image:: https://badges.gitter.im/drf_openapi/Lobby.svg
         :target: https://gitter.im/drf_openapi/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
         :alt: Join the chat at https://gitter.im/drf_openapi/Lobby
+        
+**DEPRECATION NOTICE** This project is deprecated in favour of https://github.com/axnsan12/drf-yasg/ or if you can wait https://github.com/encode/django-rest-framework/commit/e5781440fa6ccff09abc6e0566bdfdd9b84a80a1 :) :) :)
 
 
 Generates OpenAPI-compatible schema from API made with Django Rest Framework. Use `ReDoc <https://github.com/Rebilly/ReDoc>`_ as default interface instead of Swagger.
